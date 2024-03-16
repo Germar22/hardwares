@@ -22,3 +22,8 @@ void loop() {
     digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED
   }
 }
+
+//+ -> 3v
+//GND -> GND
+//AO -> 34
+//DO -> 2
