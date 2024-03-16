@@ -13,7 +13,7 @@ unsigned long startTime = 0;     // Variable to store the start time
 String HOST_NAME = "http://afas.atwebpages.com"; // change to your PC's IP address
 String PATH_NAME   = "/dashboard/db/alert.php";
 String queryString = "?coordinates";
-String coordinates = "=6.07775&longitude=125.13093&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
+String coordinates = "=12.345&longitude=67.890&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3kgfcVgJazRvFr6KyWOoXCL7Eju6ztMfwT3nEdqclUvLIDrYuP_d5t42c";
 
 void setup() {
   pinMode(soundPin, INPUT);
@@ -73,7 +73,8 @@ void loop() {
   } else if (thresholdExceeded && millis() - startTime >= 7000) {
     digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED after 2 seconds below threshold
     thresholdExceeded = false; // Reset the flag
-  } else if (!thresholdExceeded && millis() - startTime >= 2000) {
+  } else if (!thresholdExceeded && millis() - startTime >= 1000) {
     digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED if below threshold for 2 seconds
   }
 }
+
