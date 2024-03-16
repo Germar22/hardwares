@@ -1,8 +1,9 @@
 const int soundPin = 34;   // GPIO pin connected to the sound sensor
 const int ledPin = 2;      // ESP32 onboard LED pin
 int soundVal;              // sound sensor readings
-unsigned long startTime = 0; // Variable to store the start time
-bool thresholdExceeded = false; // Flag to indicate if threshold is exceeded
+
+bool thresholdExceeded = false;  // Flag to indicate if threshold is exceeded
+unsigned long startTime = 0;     // Variable to store the start time
 
 void setup() {
   pinMode(soundPin, INPUT);
@@ -17,28 +18,19 @@ void loop() {
   // Print sound value to serial
   Serial.println(soundVal);
 
-  // Check if sound level exceeds threshold and if threshold hasn't been exceeded before
+  // If sound level is above a threshold, indicate a clap
   if (soundVal > 500 && !thresholdExceeded) {
     startTime = millis(); // Record the start time
     thresholdExceeded = true; // Set the flag to true
-    digitalWrite(ledPin, HIGH); // Turn ON LED
   }
 
-  // Check if threshold was exceeded within 5 seconds
+  // Check if the threshold was exceeded for 5 seconds
   if (thresholdExceeded && millis() - startTime >= 5000) {
-    digitalWrite(ledPin, LOW); // Turn OFF LED
-    thresholdExceeded = false; // Reset threshold exceeded flag
-  }
-
-  // Check if sound level falls below threshold after LED has been turned off
-  if (!thresholdExceeded && millis() - startTime >= 2000) {
-    if (soundVal <= 500) {
-      digitalWrite(ledPin, LOW); // Turn OFF LED
-    }
+    digitalWrite(ledPin, HIGH); // Turn ON ESP32 onboard LED
+  }  else if (!thresholdExceeded && millis() - startTime >= 2000) {
+    digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED if below threshold for 2 seconds
   }
 }
-
-
 //+ -> 3v
 //GND -> GND
 //AO -> 34
