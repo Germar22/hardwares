@@ -8,12 +8,13 @@ const int ledPin = 2;      // ESP32 onboard LED pin
 int soundVal;              // sound sensor readings
 
 bool thresholdExceeded = false;  // Flag to indicate if threshold is exceeded
-unsigned long startTime = 0;     // Variable to store the start time
+unsigned long lastRequestTime = 0;     // Variable to store the last request time
+const unsigned long requestInterval = 5000; // Interval between HTTP requests (5 seconds)
 
 String HOST_NAME = "http://afas.atwebpages.com"; // change to your PC's IP address
-String PATH_NAME   = "/dashboard/db/alert.php";
+String PATH_NAME = "/dashboard/db/alert.php";
 String queryString = "?";
-String coordinates = "latitude=12.345&longitude=67.890&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
+String coordinates = "latitude=6.07776&longitude=125.13088&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
 
 void setup() {
   pinMode(soundPin, INPUT);
@@ -41,12 +42,11 @@ void loop() {
 
   // If sound level is above a threshold, indicate a clap
   if (soundVal > 500 && !thresholdExceeded) {
-    startTime = millis(); // Record the start time
     thresholdExceeded = true; // Set the flag to true
   }
 
   // Check if the threshold was exceeded for 5 seconds
-  if (thresholdExceeded && millis() - startTime >= 5000) {
+  if (thresholdExceeded && millis() - lastRequestTime >= requestInterval) {
     digitalWrite(ledPin, HIGH); // Turn ON ESP32 onboard LED
     
     // Send coordinates to the web server
@@ -70,11 +70,10 @@ void loop() {
 
     http.end();
     
-  } else if (thresholdExceeded && millis() - startTime >= 7000) {
-    digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED after 2 seconds below threshold
-    thresholdExceeded = false; // Reset the flag
-  } else if (!thresholdExceeded && millis() - startTime >= 1000) {
-    digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED if below threshold for 2 seconds
+    lastRequestTime = millis(); // Update the last request time
+    thresholdExceeded = false;  // Reset the flag
+    digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED
   }
 }
+
 
