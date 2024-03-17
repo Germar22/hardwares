@@ -1,7 +1,7 @@
 #define MQ2_PIN 34     // Define GPIO pin for MQ2 sensor
 #define LED_PIN 2      // Define digital pin for LED (can be changed to any suitable pin)
 
-const int SMOKE_THRESHOLD = 200; // Define threshold value for smoke detection
+const int SMOKE_THRESHOLD = 120; // Define threshold value for smoke detection
 
 unsigned long startTime = 0; // Variable to store the start time
 bool thresholdExceeded = false; // Flag to indicate if threshold is exceeded
@@ -32,6 +32,7 @@ void loop() {
 
   delay(100); // Delay for 0.1 second before taking the next reading
 }
+
 
 //GND -> GND
 //VCC -> 5V
