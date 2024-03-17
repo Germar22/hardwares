@@ -12,8 +12,8 @@ unsigned long startTime = 0;     // Variable to store the start time
 
 String HOST_NAME = "http://afas.atwebpages.com"; // change to your PC's IP address
 String PATH_NAME   = "/dashboard/db/alert.php";
-String queryString = "?coordinates";
-String coordinates = "=12.345&longitude=67.890&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3kgfcVgJazRvFr6KyWOoXCL7Eju6ztMfwT3nEdqclUvLIDrYuP_d5t42c";
+String queryString = "?";
+String coordinates = "latitude=12.345&longitude=67.890&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
 
 void setup() {
   pinMode(soundPin, INPUT);
