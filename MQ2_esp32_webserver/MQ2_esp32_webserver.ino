@@ -1,25 +1,24 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-#define MQ2_PIN 34     // Define GPIO pin for MQ2 sensor
-#define LED_PIN 2      // Define digital pin for LED (can be changed to any suitable pin)
-
 const char WIFI_SSID[] = "GlobeAtHome_E9602";
 const char WIFI_PASSWORD[] = "bundafamily";
+const int SOUND_PIN = 34;   // GPIO pin connected to the sound sensor
+const int LED_PIN = 2;      // ESP32 onboard LED pin
+
+unsigned long lastRequestTime = 0;  // Variable to store the last time HTTP request was sent
+unsigned long lastBelowThresholdTime = 0; // Variable to store the last time sound value was below threshold
+bool thresholdExceeded = false;  // Flag to indicate if threshold is exceeded
 
 String HOST_NAME = "http://afas.atwebpages.com"; // change to your PC's IP address
 String PATH_NAME   = "/dashboard/db/alert.php";
 String queryString = "?";
 String coordinates = "latitude=6.07776&longitude=125.13088&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
 
-const int SMOKE_THRESHOLD = 140; // Define threshold value for smoke detection
-
-unsigned long startTime = 0; // Variable to store the start time
-bool ledOn = false; // Flag to indicate if LED is on
-
 void setup() {
-  Serial.begin(9600);   // Start serial communication at 9600 bps
-  pinMode(LED_PIN, OUTPUT); // Set LED pin as output
+  pinMode(SOUND_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(9600);
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.println("Connecting");
@@ -34,40 +33,46 @@ void setup() {
 }
 
 void loop() {
-  int sensorValue = analogRead(MQ2_PIN); // Read analog value from MQ2 sensor
+  // Read the sound sensor
+  int soundVal = analogRead(SOUND_PIN);
 
-  // Send the sensor value to the serial plotter
-  Serial.println(sensorValue);
+  // Print sound value to serial
+  Serial.println(soundVal);
 
-  // Check if the value exceeds the threshold
-  if (sensorValue > SMOKE_THRESHOLD) {
-    if (!ledOn) {
-      startTime = millis(); // Record the start time
-      digitalWrite(LED_PIN, HIGH); // Turn on LED
-      ledOn = true; // Set LED flag to true
-      sendHTTPRequest(); // Send HTTP request
-    }
-  } else {
-    // Check if the LED has been on for at least 5 seconds
-    if (ledOn && (millis() - startTime >= 5000)) {
-      digitalWrite(LED_PIN, LOW); // Turn off LED
-      ledOn = false; // Set LED flag to false
-    }
+  // If sound level is above a threshold, indicate a clap
+  if (soundVal > 500 && !thresholdExceeded) {
+    thresholdExceeded = true; // Set the flag to true
+    lastRequestTime = millis(); // Record the time
   }
 
-  delay(100); // Delay for 0.1 second before taking the next reading
+  // Check if the threshold was exceeded for 5 seconds
+  if (thresholdExceeded && millis() - lastRequestTime >= 5000) {
+    digitalWrite(LED_PIN, HIGH); // Turn ON ESP32 onboard LED
+    sendHTTPRequest(); // Send HTTP request
+    thresholdExceeded = false; // Reset the flag
+  } 
+  
+  // If the sound level is below the threshold
+  if (!thresholdExceeded) {
+    // Record the time when it was last below threshold
+    lastBelowThresholdTime = millis();
+  }
+  
+  // If it has been below threshold for 5 seconds, turn off LED
+  if (!thresholdExceeded && millis() - lastBelowThresholdTime >= 5000) {
+    digitalWrite(LED_PIN, LOW);
+  }
 }
 
 void sendHTTPRequest() {
   HTTPClient http;
-
   http.begin(HOST_NAME + PATH_NAME + queryString + coordinates); //HTTP
   int httpCode = http.GET();
 
   // httpCode will be negative on error
-  if(httpCode > 0) {
+  if (httpCode > 0) {
     // file found at server
-    if(httpCode == HTTP_CODE_OK) {
+    if (httpCode == HTTP_CODE_OK) {
       String payload = http.getString();
       Serial.println(payload);
     } else {
