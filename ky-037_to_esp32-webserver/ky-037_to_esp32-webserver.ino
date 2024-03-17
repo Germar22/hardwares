@@ -7,12 +7,12 @@ const int soundPin = 34;   // GPIO pin connected to the sound sensor
 const int ledPin = 2;      // ESP32 onboard LED pin
 int soundVal;              // sound sensor readings
 
+unsigned long lastRequestTime = 0;  // Variable to store the last time HTTP request was sent
+unsigned long lastBelowThresholdTime = 0; // Variable to store the last time sound value was below threshold
 bool thresholdExceeded = false;  // Flag to indicate if threshold is exceeded
-unsigned long lastRequestTime = 0;     // Variable to store the last request time
-const unsigned long requestInterval = 5000; // Interval between HTTP requests (5 seconds)
 
 String HOST_NAME = "http://afas.atwebpages.com"; // change to your PC's IP address
-String PATH_NAME = "/dashboard/db/alert.php";
+String PATH_NAME   = "/dashboard/db/alert.php";
 String queryString = "?";
 String coordinates = "latitude=6.07776&longitude=125.13088&alert_time=2024-03-15%2012%3A00%3A00&fbclid=IwAR3-vStEmecQRHnqx0tEumiufVSq_hyZ14xLRMbq6b1RN-cCI-Fa6e_iQNY";
 
@@ -43,10 +43,11 @@ void loop() {
   // If sound level is above a threshold, indicate a clap
   if (soundVal > 500 && !thresholdExceeded) {
     thresholdExceeded = true; // Set the flag to true
+    lastRequestTime = millis(); // Record the time
   }
 
   // Check if the threshold was exceeded for 5 seconds
-  if (thresholdExceeded && millis() - lastRequestTime >= requestInterval) {
+  if (thresholdExceeded && millis() - lastRequestTime >= 5000) {
     digitalWrite(ledPin, HIGH); // Turn ON ESP32 onboard LED
     
     // Send coordinates to the web server
@@ -70,9 +71,19 @@ void loop() {
 
     http.end();
     
-    lastRequestTime = millis(); // Update the last request time
-    thresholdExceeded = false;  // Reset the flag
-    digitalWrite(ledPin, LOW);  // Turn OFF ESP32 onboard LED
+    // Reset the flag
+    thresholdExceeded = false;
+  } 
+  
+  // If the sound level is below the threshold
+  if (!thresholdExceeded) {
+    // Record the time when it was last below threshold
+    lastBelowThresholdTime = millis();
+  }
+  
+  // If it has been below threshold for 5 seconds, turn off LED
+  if (!thresholdExceeded && millis() - lastBelowThresholdTime >= 5000) {
+    digitalWrite(ledPin, LOW);
   }
 }
 
