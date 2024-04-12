@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char WIFI_SSID[] = "realme C21-Y";
+const char WIFI_SSID[] = "realme 2";
 const char WIFI_PASSWORD[] = "123987654";
 const int soundPin = 34;   // GPIO pin connected to the sound sensor
 const int ledPin = 2;      // ESP32 onboard LED pin
