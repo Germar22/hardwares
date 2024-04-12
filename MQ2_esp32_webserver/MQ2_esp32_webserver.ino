@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char WIFI_SSID[] = "CMOICTD";
-const char WIFI_PASSWORD[] = "@CMOictd2022";
+const char WIFI_SSID[] = "Gabing PisoWiFi";
+const char WIFI_PASSWORD[] = "";
 const int soundPin = 34;   // GPIO pin connected to the sound sensor
 const int ledPin = 2;      // ESP32 onboard LED pin
 int soundVal;              // sound sensor readings
@@ -47,7 +47,7 @@ void loop() {
   Serial.println(soundVal);
 
   // If sound level is above a threshold, indicate a clap
-  if (soundVal > 160 && !thresholdExceeded) {
+  if (soundVal > 500 && !thresholdExceeded) {
     thresholdExceeded = true; // Set the flag to true
     lastRequestTime = millis(); // Record the time
   }
