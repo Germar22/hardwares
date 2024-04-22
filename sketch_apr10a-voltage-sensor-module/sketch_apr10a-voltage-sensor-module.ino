@@ -1,8 +1,8 @@
-#include <WiFi.h>
+#include <ESPWiFi.h>
 #include <HTTPClient.h>
 
-const char WIFI_SSID[] = "DCTECHFIBRF30_5G"; //DCTECHFIBRF30_5G
-const char WIFI_PASSWORD[] = "1234FB0F30"; //1234FB0F30
+const char WIFI_SSID[] = "realme"; //
+const char WIFI_PASSWORD[] = "123987654"; //
 const int ledPin = 2;                  // ESP32 onboard LED pin
 const int voltageSensorPin = 34;       // Analog pin for voltage sensor
 const float VOLTAGE_THRESHOLD = 5.0;   // Set your voltage threshold here (in volts)
